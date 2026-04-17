@@ -9,12 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.effectivemobile.rxjava.R
-import ru.effectivemobile.rxjava.adapter.MyAdapter
+import ru.effectivemobile.rxjava.adapter.ListItemAdapter
 
 class SecondTabFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: MyAdapter
+    private lateinit var adapter: ListItemAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,7 +29,7 @@ class SecondTabFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val items = (1..20).map { "Элемент №$it" }
-        adapter = MyAdapter(items) { position ->
+        adapter = ListItemAdapter(items) { position ->
 
             Toast.makeText(requireContext(), "Нажата позиция: ${position + 1} ", Toast.LENGTH_SHORT).show()
         }

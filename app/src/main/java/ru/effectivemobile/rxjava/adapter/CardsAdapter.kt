@@ -2,36 +2,62 @@ package ru.effectivemobile.rxjava.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.effectivemobile.rxjava.databinding.ItemDiscountCardBinding
 import ru.effectivemobile.rxjava.model.DiscountCard
 
-class CardsAdapter(private var cards: List<DiscountCard>) :
-    RecyclerView.Adapter<CardsAdapter.CardViewHolder>() {
+class CardsAdapter(
+    private val onInteractionListener: OnInteractionListener? = null
+) : ListAdapter<DiscountCard, CardsAdapter.CardViewHolder>(DiscountCardDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_2, parent, false)
-        return CardViewHolder(view)
+        val binding = ItemDiscountCardBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return CardViewHolder(binding, onInteractionListener)
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        holder.bind(cards[position])
+        val card = getItem(position)
+        holder.bind(card)
     }
-
-    override fun getItemCount(): Int = cards.size
 
     fun updateList(newList: List<DiscountCard>) {
-        cards = newList
-        notifyDataSetChanged()
+        submitList(newList.toList())
     }
 
-    class CardViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
-        private val text1 = itemView.findViewById<android.widget.TextView>(android.R.id.text1)
-        private val text2 = itemView.findViewById<android.widget.TextView>(android.R.id.text2)
+    class CardViewHolder(
+        private val binding: ItemDiscountCardBinding,
+        private val onInteractionListener: OnInteractionListener?
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(card: DiscountCard) {
-            text1.text = "${card.owner} - ${card.discountPercent}%"
-            text2.text = "ID: ${card.id} (${card.server})"
+            binding.apply {
+                ownerName.text = "${card.owner} - ${card.discountPercent}%"
+                cardDetails.text = "ID: ${card.id} (${card.server})"
+
+                root.setOnClickListener {
+                    onInteractionListener?.onCardClick(card)
+                }
+            }
         }
+    }
+
+    interface OnInteractionListener {
+        fun onCardClick(card: DiscountCard)
+    }
+}
+
+class DiscountCardDiffCallback : DiffUtil.ItemCallback<DiscountCard>() {
+    override fun areItemsTheSame(oldItem: DiscountCard, newItem: DiscountCard): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: DiscountCard, newItem: DiscountCard): Boolean {
+        return oldItem == newItem
     }
 }

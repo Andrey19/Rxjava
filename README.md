@@ -1,16 +1,36 @@
 #RxKava
-#Задачи 
+#Задачи 1 
 1) Самая популярная, на конфликт subscribeOn и observeOn приходится 80% задач RX. Какой результат будет в логе?
-   //onSubscribeThread = main
-   //mapThread = RxNewThreadScheduler-1
-   //flatMapThread = RxSingleScheduler-1
-   //subscribeThread = RxCachedThreadScheduler-1, value = 0
+   В лог выведет :
+    onSubscribeThread = main
+    mapThread = RxNewThreadScheduler-1
+    flatMapThread = RxSingleScheduler-1
+    subscribeThread = RxCachedThreadScheduler-1, value = 0
 2) Какой результат будет в логе? Как переписать, чтоб все вывести (2 варианта есть)
   1. val subject = PublishSubject.create<String>()
    subject.subscribe { println(it) }
    subject.onNext( "1")
    subject.onNext( "2")
    subject.onNext( "3")
-  2. заменить ReplaySubject
+  2. Заменить ReplaySubject
 
-    
+#Задачи 2 
+- Сделайте сетевой запрос и отобразите результат на экране? 
+- Сделайте таймер. TextView которая раз в секунду меняется 
+- Сделайте EditText. При наборе текста выводите в лог содержимое EditText всегда, когда пользователь 3 секунды что-то не вводил 
+
+  на FirstTabFragment реализован запрос с отображением на экране и отображение таймера 
+  так же EditText  с выводом в лог содержимого 
+
+- Сделайте ресайклер. По нажатию на элемент передавайте его позицию во фрагмент. и во фрагменте этот номер отображайте в тосте. 
+
+   на SecondTabFragment реализован список с отображением позиции по нажатию 
+
+- Есть 2 сервера на которых лежат скидочные карты. Нужно получить эти данные и вывести в единый список. (zip и тд)
+а) Если 1 из запросов падает, то все равно выводить (найти метод RX для такого, чтоб самому не прописывать логику)
+б) Если 1 из запросов падает, то не выводить ничего (найти метод RX)
+
+   на ThirdTabFragment  реализован две кнопки варианта а и б 
+   два сервира реализованы в CardRepository
+   первый все время отдает ответ 
+   второй дает ошибку 

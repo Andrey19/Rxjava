@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,8 +42,18 @@ class ThirdTabFragment : Fragment() {
         btnZip = view.findViewById(R.id.btn_zip)
         recyclerView = view.findViewById(R.id.rv_cards)
         statusText = view.findViewById(R.id.tv_status)
+
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = CardsAdapter(mutableListOf())
+
+
+        adapter = CardsAdapter(object : CardsAdapter.OnInteractionListener {
+            override fun onCardClick(card: DiscountCard) {
+                Toast.makeText(requireContext(),
+                    "Нажата карта: ${card.owner} - ${card.discountPercent}%",
+                    Toast.LENGTH_SHORT).show()
+            }
+        })
         recyclerView.adapter = adapter
 
         btnMerge.setOnClickListener { loadWithMergeDelayError() }
@@ -51,22 +62,24 @@ class ThirdTabFragment : Fragment() {
 
     private fun loadWithMergeDelayError() {
         statusText.text = "Загрузка (даже если один сервер упал)..."
+
         val requestA = CardRepository.getCardsFromServerA()
             .subscribeOn(Schedulers.io())
             .onErrorReturn { error ->
-                statusText.append("\nОшибка сервера A: ${error.message}")
                 emptyList()
             }
 
         val requestB = CardRepository.getCardsFromServerB(simulateError = true)
             .subscribeOn(Schedulers.io())
             .onErrorReturn { error ->
-                statusText.append("\nОшибка сервера B: ${error.message}")
                 emptyList()
             }
 
         disposables.add(
-            Observable.mergeDelayError(requestA.toObservable(), requestB.toObservable())
+            Observable.merge(
+                requestA.toObservable(),
+                requestB.toObservable()
+            )
                 .reduce(mutableListOf<DiscountCard>()) { acc, list ->
                     acc.addAll(list)
                     acc
@@ -74,8 +87,10 @@ class ThirdTabFragment : Fragment() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { combinedList ->
-                        adapter.updateList(combinedList)
-                        statusText.text = "Загружено карт: ${combinedList.size} (с игнорированием ошибок)"
+                        recyclerView.post {
+                            adapter.updateList(combinedList)
+                            statusText.text = "Загружено карт: ${combinedList.size} (с игнорированием ошибок)"
+                        }
                     },
                     { error ->
                         statusText.text = "Ошибка: ${error.message}"
@@ -86,8 +101,10 @@ class ThirdTabFragment : Fragment() {
 
     private fun loadWithZip() {
         statusText.text = "Загрузка (требуются оба сервера)..."
+
         val requestA = CardRepository.getCardsFromServerA()
             .subscribeOn(Schedulers.io())
+
         val requestB = CardRepository.getCardsFromServerB(simulateError = true)
             .subscribeOn(Schedulers.io())
 
@@ -104,12 +121,16 @@ class ThirdTabFragment : Fragment() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { combinedList ->
-                        adapter.updateList(combinedList)
-                        statusText.text = "Загружено карт: ${combinedList.size} (оба сервера успешны)"
+                        recyclerView.post {
+                            adapter.updateList(combinedList)
+                            statusText.text = "Загружено карт: ${combinedList.size} (оба сервера успешны)"
+                        }
                     },
                     { error ->
                         statusText.text = "Ошибка: ${error.message} - один из серверов недоступен, список не показан"
-                        adapter.updateList(emptyList())
+                        recyclerView.post {
+                            adapter.updateList(emptyList())
+                        }
                     }
                 )
         )
