@@ -1,5 +1,7 @@
-#RxKava
-#Задачи 1 
+###RxJava
+
+##Задачи 1 
+
 1) Самая популярная, на конфликт subscribeOn и observeOn приходится 80% задач RX. Какой результат будет в логе?
 
    В лог выведет :
@@ -16,17 +18,18 @@
    
   1. val subject = PublishSubject.create<String>()
 
-   subject.subscribe { println(it) }
+       subject.subscribe { println(it) }
 
-   subject.onNext( "1")
+       subject.onNext( "1")
 
-   subject.onNext( "2")
+       subject.onNext( "2")
 
-   subject.onNext( "3")
+       subject.onNext( "3")
  
   2. Заменить ReplaySubject
 
-#Задачи 2 
+##Задачи 2 
+
 - Сделайте сетевой запрос и отобразите результат на экране? 
 - Сделайте таймер. TextView которая раз в секунду меняется 
 - Сделайте EditText. При наборе текста выводите в лог содержимое EditText всегда, когда пользователь 3 секунды что-то не вводил 
