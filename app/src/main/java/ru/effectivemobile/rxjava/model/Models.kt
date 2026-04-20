@@ -4,7 +4,7 @@ data class DiscountCard(
     val id: Int,
     val owner: String,
     val discountPercent: Int,
-    val server: String // для отладки
+    val server: String
 )
 
 
